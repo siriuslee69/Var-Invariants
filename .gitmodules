@@ -1,0 +1,3 @@
+[submodule "submodules/Rune-Pragmas"]
+	path = submodules/Rune-Pragmas
+	url = https://github.com/siriuslee69/Rune-Pragmas.git
