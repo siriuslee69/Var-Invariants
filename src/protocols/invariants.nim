@@ -297,7 +297,8 @@ proc oldSnapshots(cond: NimNode): NimNode {.compileTime, role: actor,
       ident(name)))
   result.add(section)
 
-macro forall*(spec, pred: untyped): untyped =
+macro forall*(spec, pred: untyped): untyped {.role: helper,
+    tag: "contract".} =
   ## spec: `x in something`   pred: what must hold for every one.
   ##
   ##     forall(i in 1 ..< A.len, A[i - 1] <= A[i])   <- A is sorted
@@ -316,7 +317,8 @@ macro forall*(spec, pred: untyped): untyped =
     newNimNode(nnkVarSection).add(newIdentDefs(ok, ident("bool"),
       ident("true"))), loop, ok))
 
-macro exists*(spec, pred: untyped): untyped =
+macro exists*(spec, pred: untyped): untyped {.role: helper,
+    tag: "contract".} =
   ## spec: `x in something`   pred: what must hold for at least one.
   ##
   ##     exists(c in s, c == '=')   <- there is an equals sign in s
@@ -366,34 +368,40 @@ proc buildContract(k: ContractKind, cond, def: NimNode, atRun: bool): NimNode
       wrapped,
       checkNode(cond, "keeps on exit", who, atRun))
 
-macro needs*(cond: untyped, def: untyped): untyped =
+macro needs*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold before the body runs.
   ## Checked while the compiler runs the routine. Costs nothing.
   result = buildContract(ckNeeds, cond, def, atRun = false)
 
-macro gives*(cond: untyped, def: untyped): untyped =
+macro gives*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold once the body has run. `result` names what
   ## comes back. Checked while the compiler runs the routine.
   result = buildContract(ckGives, cond, def, atRun = false)
 
-macro keeps*(cond: untyped, def: untyped): untyped =
+macro keeps*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold both before and after. Checked while the
   ## compiler runs the routine.
   result = buildContract(ckKeeps, cond, def, atRun = false)
 
-macro needsRun*(cond: untyped, def: untyped): untyped =
+macro needsRun*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold before the body runs.
   ## Checked while the compiler runs the routine, and again in the
   ## program itself unless the checks are switched off.
   result = buildContract(ckNeeds, cond, def, atRun = true)
 
-macro givesRun*(cond: untyped, def: untyped): untyped =
+macro givesRun*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold once the body has run. `old(x)` names the
   ## value `x` held on the way in.
   ## Checked while building and again while running.
   result = buildContract(ckGives, cond, def, atRun = true)
 
-macro keepsRun*(cond: untyped, def: untyped): untyped =
+macro keepsRun*(cond: untyped, def: untyped): untyped {.role: orchestrator,
+    tag: "contract".} =
   ## cond: what must hold both before and after.
   ## Checked while building and again while running.
   result = buildContract(ckKeeps, cond, def, atRun = true)

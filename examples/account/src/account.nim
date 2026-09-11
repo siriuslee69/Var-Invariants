@@ -13,22 +13,24 @@
 ## ================================================================
 
 import var_invariants
+import runePragmas
 
-proc withdraw*(balance, amount: int): int {.needs: amount <= balance,
-    gives: result >= 0.} =
+proc withdraw*(balance, amount: int): int {.role: math, tag: "account",
+    needs: amount <= balance, gives: result >= 0.} =
   ## balance: what is there   amount: what is being taken.
   ## Checked while the compiler runs this, and free in the program.
   balance - amount
 
-proc classify*(a: int): string {.gives: result.len > 0.} =
+proc classify*(a: int): string {.role: math, tag: "account",
+    gives: result.len > 0.} =
   ## a: any number. A word for it, never an empty one.
   ## The early `return` does not step over the promise.
   if a > 0:
     return "high"
   result = "low"
 
-proc isSorted*(A: seq[int]): bool {.gives: result == forall(i in 1 ..< A.len,
-    A[i - 1] <= A[i]).} =
+proc isSorted*(A: seq[int]): bool {.role: math, tag: "account",
+    gives: result == forall(i in 1 ..< A.len, A[i - 1] <= A[i]).} =
   ## A: a list of numbers. Whether each one is at least the one before.
   ## The promise says the same thing the body does, in one line, so
   ## the two have to agree.
@@ -37,7 +39,8 @@ proc isSorted*(A: seq[int]): bool {.gives: result == forall(i in 1 ..< A.len,
     if A[i - 1] > A[i]:
       result = false
 
-proc trim*(S: var seq[int]) {.keeps: S.len < 1000.} =
+proc trim*(S: var seq[int]) {.role: actor, tag: "account",
+    keeps: S.len < 1000.} =
   ## S: the list. Drops its last item if it has one.
   ##
   ## `keeps` is `needs` and `gives` in one word, and the difference is
@@ -52,14 +55,15 @@ proc trim*(S: var seq[int]) {.keeps: S.len < 1000.} =
   if S.len > 0:
     S.setLen(S.len - 1)
 
-proc push*(S: var seq[int], v: int) {.givesRun: S.len == old(S).len + 1.} =
+proc push*(S: var seq[int], v: int) {.role: actor, tag: "account",
+    givesRun: S.len == old(S).len + 1.} =
   ## S: the list   v: what to put on it.
   ## `old(S)` is the list as it arrived, so the promise can compare
   ## the two.
   S.add(v)
 
-proc drain*(S: var seq[int]): int {.needsRun: S.len > 0,
-    keepsRun: S.len >= 0.} =
+proc drain*(S: var seq[int]): int {.role: actor, tag: "account",
+    needsRun: S.len > 0, keepsRun: S.len >= 0.} =
   ## S: the list. The last item, taken off.
   ## The running program carries both checks, so an empty list raises
   ## instead of reading past the end.

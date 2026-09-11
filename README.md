@@ -361,7 +361,7 @@ Var-Invariants/
 ├── src/
 │   ├── var_invariants.nim          <- the one import
 │   └── protocols/
-│       └── invariants.nim          <- all of it, ~400 lines
+│       └── invariants.nim          <- all of it, ~410 lines
 ├── evaluation/
 │   └── tests/test_invariants.nim   <- nine tests
 ├── examples/
@@ -413,6 +413,17 @@ Things that are known, and are not going to surprise you twice.
 `config.nims` here to yours, or clone `Rune-Pragmas` next to your
 repository.
 
+╭⟢ `invalid pragma: role: math` on a routine that also has a promise ⟡
+
+The `needs` macro re-emits the whole pragma list, so every pragma
+written in that block has to be visible where the routine is. If the
+block mixes a role in with a promise, import both:
+
+```nim
+import var_invariants
+import runePragmas
+```
+
 ╭⟢ Otter reports the six macros as a "family" 🐦‍🔥
 
 Otter's family check groups routines that are one routine with a knob
@@ -422,11 +433,27 @@ knob - `buildContract` - and the six names are the API surface: a
 pragma is written by name, so the six names cannot be collapsed into
 one without losing the whole point. The finding is expected here.
 
-╭⟢ Otter reports `contractFailed` as a placeholder 🍣
+╭⟢ `contractFailed` and the placeholder guess 🍣
 
 A body that only raises is one of the signals Otter adds up when
-guessing whether somebody forgot to finish a routine. Here, refusing
-to work *is* the job. It carries `stage: stDone` to say so out loud.
+guessing whether somebody forgot to finish a routine. Here, refusing to
+work *is* the job, so it carries `stage: stDone` to say so out loud.
+
+That used to be reported anyway. A declared stage only skipped Otter's
+"a pragma says this is unfinished" shortcut and left the guesses running
+underneath it. Otter was changed at the same time as this split, so a
+declared `stDone` is now a person's statement that outranks every guess.
+With an Otter older than 2026-09-11 the finding comes back.
+
+╭⟢ Otter reports the test as holding "embedded code" 🌊
+
+Four of the tests build whole programs, and those programs are Nim
+source kept in strings. Otter reads a multi-line string that looks like
+code and says so. It is right, and it is meant to be that way: the
+promise and the violation it is tested against are kept side by side so
+the two cannot drift apart. The rule behind that finding is about the
+comment marker to use inside such a block - here the embedded language
+is Nim, so `#` is already correct.
 
 ╭⟢ A `gives` on a routine whose last line is `{.discardable.}` ❧
 

@@ -13,36 +13,41 @@ import std/[os, osproc, strutils, unittest]
 import ../../src/protocols/invariants
 import runePragmas
 
-proc withdraw(balance, amount: int): int {.needs: amount <= balance,
-    gives: result >= 0.} =
+proc withdraw(balance, amount: int): int {.role: math, tag: "test",
+    needs: amount <= balance, gives: result >= 0.} =
   ## balance: what is there   amount: what is being taken.
   balance - amount
 
-proc classify(a: int): string {.gives: result.len > 0.} =
+proc classify(a: int): string {.role: math, tag: "test",
+    gives: result.len > 0.} =
   ## a: any number. Its early `return` must not step over the promise.
   if a > 0:
     return "high"
   result = "low"
 
-proc broken(a: int): string {.gives: result.len > 0.} =
+proc broken(a: int): string {.role: math, tag: "test",
+    gives: result.len > 0.} =
   ## a: any number. Returns nothing at all when a is small, which is
   ## what the promise forbids.
   if a > 0:
     return "high"
   result = ""
 
-proc counted(A: seq[int]): int {.gives: result <= A.len.} =
+proc counted(A: seq[int]): int {.role: math, tag: "test",
+    gives: result <= A.len.} =
   ## A: a list. How many of them are above zero.
   result = 0
   for x in A:
     if x > 0:
       result = result + 1
 
-proc push(S: var seq[int], v: int) {.givesRun: S.len == old(S).len + 1.} =
+proc push(S: var seq[int], v: int) {.role: actor, tag: "test",
+    givesRun: S.len == old(S).len + 1.} =
   ## S: the list   v: what to add.
   S.add(v)
 
-proc drain(S: var seq[int]): int {.needsRun: S.len > 0.} =
+proc drain(S: var seq[int]): int {.role: actor, tag: "test",
+    needsRun: S.len > 0.} =
   ## S: the list. Its last item, taken off.
   result = S[^1]
   S.setLen(S.len - 1)

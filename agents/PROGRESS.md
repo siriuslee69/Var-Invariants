@@ -48,3 +48,13 @@ Notes:
   `Otter-RepoEvaluation/src/protocols/code_stats/placeholders.nim`.
   Before, a routine whose whole job is to raise was reported as
   unfinished no matter what it said about itself.
+- Roles were added to every routine after the first Otter measurement of
+  this repository reported 14 without one. That surfaced a real trap
+  worth knowing: the `needs` macro re-emits the whole pragma list, so a
+  routine writing `{.role: math, needs: ...}` needs `runePragmas`
+  imported at its own site, not just here. The example shows both
+  imports for that reason.
+- Two Otter findings are expected and stay: the six macros read as a
+  "family" (they are one builder with six API names, which is the point)
+  and the test's generated programs read as "embedded code" (they are
+  Nim, kept beside the promise they test so the two cannot drift).
