@@ -1,6 +1,6 @@
 # Progress
 
-Commit Message: Split the contract pragmas out of Otter into their own repository
+Commit Message: Stop tracking compiled test and example programs
 
 Features (Planned):
 - A `needs`/`gives` pair that reads the routine's own parameters out of
