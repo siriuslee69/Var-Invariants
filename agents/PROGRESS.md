@@ -1,6 +1,6 @@
 # Progress
 
-Commit Message: Stop tracking compiled test and example programs
+Commit Message: Pin Rune-Pragmas at its rewritten history
 
 Features (Planned):
 - A `needs`/`gives` pair that reads the routine's own parameters out of
